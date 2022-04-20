@@ -1,4 +1,3 @@
-
 <html lang="en">
 
 <head>
@@ -7,19 +6,38 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bot</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <!-- <script src="/socket_io/socket_io.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"> </script>
+    
 </head>
 
 <body>
-    <h1>Tasks</h1>
-    <div class="messages"></div>
-
+    <div class="container">
+       <h1>Tasks</h1>
+       <div id="msgs"></div>
+       <input type="text" />
+    </div>
     <!-- ouvindo a conexão -->
     <script>
-        const socket = io()
+        var socket = io();
+        //quando o cliente conectar
+        socket.on('connect', function() {
+            $("#msgs").append('Connected with ID: '+socket.id+'<br>')
+            //enviando para o servidor uma mensagem
+            socket.emit('msg', 'Cliente está conectado: '+socket.id)
+        })
+        socket.on('msg', function(msg) {
+            $("#msgs").append(msg+'<br>')
+        })
+        $(function() {
+            $("input").keydown(function(key) {
+                console.log(key.keyCode)
+                if(key.keyCode === 13){
+                    socket.emit('msg', $(this).val())
+                    $(this).val('')
+                }
+            })
+        })
     </script>
 </body>
 

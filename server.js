@@ -1,32 +1,25 @@
-const express = require('express');
-const path = require('path');
-const app = express();
+var app = require('express')();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
 
-// const tmi = require('tmi.js');
+const PORT = 3001;
 
-//configurando o http e websocket
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-
-//definido a pasta onde ficarão os arquivosw frontend da aplicação
-app.use(express.static(path.join(__dirname, 'src')));
-
-//definindo onde irão ficar as views
-app.set('views', path.join(__dirname, 'src'));
-
-//definindo o uso do html para  visualização
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
-
-//quando o endereço do servidor padrão for acessado, renderiza a view index.html
-app.use('/', (req, res) => {
-    res.render('index.html');
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/src/index.html');
 });
 
-io.on('connection', (socket) => {
-    console.log('New connection',socket)
-})
-//ouvindo
-app.listen(3001, function(){
-    console.log('listening on 3001...');
-})
+http.listen(PORT, function () {
+    console.log('ouvindo *:' + PORT);
+});
+
+io.on('connection', function (socket) {
+    console.log("um usuário se conectou!", socket.id)
+    socket.on('msg', (msg) =>{
+        //o servidor envia uma mensagem para todos da rede
+        socket.broadcast.emit('msg', msg)
+    })
+});
+io.on('disconnect', function(socket) {
+    console.log('usuário desconectado',socket.id);
+ 
+});
